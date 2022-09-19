@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import { ReactP5Wrapper } from "react-p5-wrapper";
 import WordList from "./WordList";
+import GameCompleted from "./GameCompleted";
 import MultiplayerScore from "./MultiplayerScore"
 
 // import sketch from "../assets/sketch";
@@ -31,6 +32,7 @@ function GameContainer(props) {
   let [multiPlayerId, setMultiPlayerId] = useState(props.multiPlayerId);
   let [isMPgameCompleted, setMPGameCompleted] = useState(props.isMPgameCompleted);
 
+  let [showNGButton, setShowNGButton] = useState(false);
 
 
   useEffect(() => {
@@ -41,8 +43,15 @@ function GameContainer(props) {
     updateFoundWordData(props.lines)
     setMultiPlayerId(props.multiPlayerId)
     setMPGameCompleted(props.isMPgameCompleted)
+
+    if (gameCompleted){
+        setTimeout(() => {
+          setShowNGButton(true)
+      }, 1000);
+    }
     
-  }, [props.board,
+  }, [gameCompleted,
+    props.board,
     props.wordListStatus,
     props.answerKey,
     props.multiPlayerState,
@@ -148,11 +157,15 @@ function GameContainer(props) {
       />
       }
 
-      <GameCompletedOutput 
+
+      <GameCompleted 
       multiPlayerState={multiPlayerState} 
       gameCompleted={gameCompleted}
       isMPgameCompleted={isMPgameCompleted}
       />
+
+      {/* {showNGButton && <button onClick={}>New Game</button>} */}
+
     </>
   );
 }

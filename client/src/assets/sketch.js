@@ -20,7 +20,7 @@ function sketch(p5) {
     }
 
     let mainFont = "Montserrat";
-    let startX,startY;
+    let startX, startY, boardArea;
     let letterCoords = [];
     let lettersMoused = [];
     let colorPerLine = [];
@@ -56,10 +56,10 @@ function sketch(p5) {
     p5.setup = () => {
       checkForUpdatedProps()
       let gridSize = gameBoard.length; 
-      let widthHeight = squareSize * gridSize + 2 // +2 compensates for left and top border
-      p5.createCanvas(widthHeight, widthHeight);
+      boardArea = squareSize * gridSize + 2 // +2 compensates for left and top border
+      p5.createCanvas(boardArea, boardArea);
       p5.noLoop();
-      // console.log(foundWordData)
+      // console.log(boardArea)
 
     }
 
@@ -73,26 +73,27 @@ function sketch(p5) {
     
     //set and temporarily save coordinates of where mouse down occured
     p5.mousePressed = () => {
-      //TODO: SET CLAUSE FOR CLICKING OUTSIDE OF CANVAS
       // resetBoardData()
       startX = p5.mouseX;
       startY = p5.mouseY;
-      
+       // dont draw line if intial click was made outside of board area
+      if (!isClickInbounds(startX,startY,boardArea)) return;
+
+      // console.log(startX,startY,boardArea)
       lettersMoused.push( findLetterFromCoordinate(startX,startY))
     }
     //on each drag action, clear the last line, rerun draw function and draw a new line
     p5.mouseDragged = () => {
       p5.clear()
       resetBoardData()  
-     
-
+      // dont draw line if intial click was made outside of board area
+      if (!isClickInbounds(startX,startY,boardArea)) return;
       // p5.stroke(tranparentBlue) 
       p5.line(startX,startY,p5.mouseX,p5.mouseY);
     }
 
     // actions for mouseUp
     p5.mouseReleased = () => {
-      //TODO: SET CLAUSE FOR CLICKING OUTSIDE OF CANVAS(NO LINE DRAWN IF END OUTSIDE OF CANVAS)
       lettersMoused.push( findLetterFromCoordinate(p5.mouseX,p5.mouseY)) // temp save coord of where mouse up occured
       let lettersCheckedResult = checkAnswer(lettersMoused); // check 
       let [firstLetter,secondLetter] = lettersMoused;
@@ -238,6 +239,10 @@ function sketch(p5) {
     function resetBoardData(){
       letterCoords.length = 0;
       p5.redraw()
+    }
+
+    function isClickInbounds(x,y,boardArea){
+      return x < boardArea && x > 0 && y < boardArea && y > 0
     }
     
  }

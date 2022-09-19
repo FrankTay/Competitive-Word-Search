@@ -1,5 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import GameContainer from './components/GameContainer'
+import Loading from './components/Loading'
+
 import io from "socket.io-client";
 import CreateBoard from "./assets/CreateBoard";
 import sketch from "./assets/sketch";
@@ -9,19 +11,21 @@ const socket = io.connect("http://localhost:3001");
 //TODO:CREATE CLAUSE THAT CYCLES THROUGH VARIOUS WORD LIST SIZES AND REATTEMPTS FAILED BOARDS
 //TODO: limit board size to no smaller than 10x10 and no greater than 25x25 and increments of 5
 //TODO: handle error of no boards being returned
-let boardInfo = new CreateBoard(10, 4); //default 20 x 20 board, with 30 words
-let newBoard = boardInfo.generateBoard();
-let boardWordList = newBoard.answers.map(elem => elem.word);
-let wordListStatus = boardWordList.map(elem => {
+
+
+function App() {
+  let boardInfo = new CreateBoard(10, 1); //default 20 x 20 board, with 30 words
+  let newBoard = boardInfo.generateBoard();
+  let boardWordList = newBoard.answers.map(elem => elem.word);
+  let wordListStatus = boardWordList.map(elem => {
     return {
       word: elem,
       found: false,
       foundBy:null
     };
-})
+  })
 
 
-function App() {
   let [boardState, updateBoardState] = useState(newBoard.board);
   let [answerKey, setAnswerKey] = useState(newBoard.answers);
   let [wordStatuses, setWordStatus] = useState(wordListStatus);
@@ -101,7 +105,7 @@ function App() {
         <button className='singlePlayer' onClick={startSinglePlayerGame}  disabled={!multiPlayer}><h1>Single Player</h1></button>
         <button onClick={join_room}><h1>MultiPlayer</h1></button>
       </div>
-      {isMPgamePending && <h3>Searching for competitor</h3>}
+      {(multiPlayer && isMPgamePending) && <Loading />} 
       <div className={(multiPlayer && isMPgamePending) ? "hide-container": "show-container"}>
         <GameContainer 
           sketch={sketch}
