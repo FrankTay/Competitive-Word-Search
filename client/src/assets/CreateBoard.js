@@ -26,11 +26,16 @@ class CreateBoard {
   getWordList(listLength){
     //get wordlist of a certain length from wordlist
     let words = Array(listLength).fill(null);
+    
+    // filter words longer than dimensions
+    let filteredWordList = allWords.filter(word => word.length <= this.dimensions)
+
     //TODO: return list with no duplicates
     words = words.map(word => {
-      let totalWords = allWords.length;
+
+      let totalWords = filteredWordList.length;
       let randomNumber = Math.floor(Math.random()*totalWords)
-      return allWords[randomNumber]
+      return filteredWordList[randomNumber]
     })
 
     // sort by word size to ensure all words will fit in puzzle

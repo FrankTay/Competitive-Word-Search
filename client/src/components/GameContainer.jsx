@@ -1,38 +1,25 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useContext} from "react";
 import { ReactP5Wrapper } from "react-p5-wrapper";
 import WordList from "./WordList";
-import GameCompleted from "./GameCompleted";
-import MultiplayerScore from "./MultiplayerScore"
-
-// import sketch from "../assets/sketch";
-
-//TODO:CREATE CLAUSE THAT CYCLES THROUGH VARIOUS WORD LIST SIZES AND REATTEMPTS FAILED BOARDS
-//TODO: limit board size to no smaller than 10x10 and no greater than 25x25 and increments of 5
-//TODO: handle error of no boards being returned
-// let boardInfo = new CreateBoard(); //default 20 x 20 board, with 30 words
-// let newBoard = boardInfo.generateBoard();
-// let boardWordList = newBoard.answers.map(elem => elem.word);
-// let wordListStatus = boardWordList.map(elem => {
-//     return {
-//       word: elem,
-//       found: false
-//     };
-// })
+import CompetedGameText from "./CompetedGameText";
+import MultiplayerScore from "./MultiplayerScore";
+import { GameCompletedContext } from "../contexts/GameCompletedContext";
 
 //TODO: for multiplayer, refactor to only update values serverside
 
 function GameContainer(props) {
+//{sketch, boardState, answerKey, linesState, sendUpdatesToServer, boardWordList, wordStatuses, multiPlayerState, multiPlayerId, resetGame}
+
+  const {isGameCompleted, setIsGameCompleted} = useContext(GameCompletedContext)
 
   let [boardState, updateBoardState] = useState(props.board);
   let [wordStatuses, setWordStatus] = useState(props.wordListStatus);
   let [answerKey, setAnswerKey] = useState(props.answerKey);
   let [foundWordData, updateFoundWordData] = useState(props.lines);
-  let [gameCompleted, setGameCompleted] = useState(false);
   let [multiPlayerState, setMultiPlayerState] = useState(props.multiPlayerState);
   let [multiPlayerId, setMultiPlayerId] = useState(props.multiPlayerId);
-  let [isMPgameCompleted, setMPGameCompleted] = useState(props.isMPgameCompleted);
+  // let [isMPgameCompleted, setMPGameCompleted] = useState(props.isMPgameCompleted);
 
-  let [showNGButton, setShowNGButton] = useState(false);
 
 
   useEffect(() => {
@@ -42,26 +29,19 @@ function GameContainer(props) {
     setMultiPlayerState(props.multiPlayerState)
     updateFoundWordData(props.lines)
     setMultiPlayerId(props.multiPlayerId)
-    setMPGameCompleted(props.isMPgameCompleted)
+    // setMPGameCompleted(props.isMPgameCompleted)
 
-    if (gameCompleted){
-        setTimeout(() => {
-          setShowNGButton(true)
-      }, 1000);
-    }
-    
-  }, [gameCompleted,
-    props.board,
+  }, [props.board,
     props.wordListStatus,
     props.answerKey,
     props.multiPlayerState,
     props.lines,
     props.multiPlayerId,
-    props.isMPgameCompleted]);
+    // props.isMPgameCompleted
+  ]);
 
 
-
-  function checkAnswer(answerLine){
+  const checkAnswer = (answerLine) => {
     let [start,end] = answerLine;
     // if either mouse up or down coordinates fall outside of canvas bounds
     if (!(start) || !(end)) return false
@@ -79,26 +59,30 @@ function GameContainer(props) {
     return directionOne || directionTwo
   }
 
-  function checkIfGameComplete(){
+
+  const checkIfGameComplete = () => {
     // check if all words are found
     return wordStatuses.every(elem => elem.found === true)
   }
 
-  function removeWordFromList(word){
+
+  const removeWordFromList = (word) => {
     //update status of found word
     wordStatuses = wordStatuses.map(elem => {
       if (elem.word === word) elem.found = true
       return elem
     })
+
     //TODO: ONLY CHECK LOCALLY IF SINGLE PLAYER GAME
     let isGameFinished = checkIfGameComplete()
 
-    //set state of above values
-    if(!multiPlayerState) setGameCompleted(isGameFinished) 
+    // set state of above values
+    if(!multiPlayerState) setIsGameCompleted(isGameFinished) 
+  
     setWordStatus(wordStatuses)
   }
 
-  function sendLinesToApp(linesAndWord){
+  const sendLinesToApp = (linesAndWord) => {
     //updates to be processed server side
     if (multiPlayerState){
       props.sendUpdatesToServer(linesAndWord)
@@ -111,20 +95,27 @@ function GameContainer(props) {
     return multiPlayerState
   }
 
-  // console.log(wordStatuses)
-  // console.log(foundWordData)
-// console.log(`playing multi? ${multiPlayerState}`)
-
-
-  function GameCompletedOutput({multiPlayerState, gameCompleted,isMPgameCompleted}) {
-
-    if (multiPlayerState && isMPgameCompleted) {
-      return <h1 className="game-completed">muli game-completed</h1>;
-    } else if (gameCompleted)
-     return <h1 className="game-completed">SINGLE player Game Completed!!!</h1>;
+  const updateGameState = () => {
+    setIsGameCompleted(true);
   }
 
-  
+  const resetGameContainer = () => {
+    //reset single player values
+    props.resetGame();
+    setIsGameCompleted(false) 
+  }
+
+
+  useEffect(() => {
+    // let isGameFinished = checkIfGameComplete()
+
+    // if (isGameFinished)  {
+    //   setIsGameCompleted(isGameFinished)
+    // }
+    console.log(`game status from container UF ${isGameCompleted}`)
+  }, [isGameCompleted]);
+
+
 
   return (
     <>
@@ -154,18 +145,17 @@ function GameContainer(props) {
       {multiPlayerState && <MultiplayerScore 
         wordStatuses={wordStatuses}
         multiPlayerId={multiPlayerId}
+        updateGameState={updateGameState}
       />
       }
 
 
-      <GameCompleted 
+      {isGameCompleted && <CompetedGameText 
       multiPlayerState={multiPlayerState} 
-      gameCompleted={gameCompleted}
-      isMPgameCompleted={isMPgameCompleted}
+      resetGame={resetGameContainer}
+      // isMPgameCompleted={isMPgameCompleted}
       />
-
-      {/* {showNGButton && <button onClick={}>New Game</button>} */}
-
+      }
     </>
   );
 }

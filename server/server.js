@@ -22,8 +22,12 @@ const io = new Server(server, {
 // }) 
 // let rooms = {}
 let roomsData = [] // elements are an objects with > roomId: str, occupants: set, data: array
+function findRoomContainingUser(userId) {
+  return roomsData.find(elem => elem.occupants.has(userId))
+};
 
-function removeUserFromRoom(userId) {
+
+function removeUserFromRooms(userId) {
   return roomsData.map(elem => {
     if (elem.occupants.has(userId)) elem.occupants.delete(userId);
     return elem;
@@ -38,6 +42,7 @@ function deleteEmptyRooms() {
 }
 
 io.on("connection", (socket) => {
+
   let user = socket.id
   console.log(`User Connected: ${user}`);
   // console.log(socket)
@@ -72,17 +77,18 @@ io.on("connection", (socket) => {
       roomToJoin = roomsData[availableRoomIndex].roomId;
       console.log(`JOINING ROOM: ${roomsData[availableRoomIndex].roomId}`)
     }
-    
+     
     socket.join(roomToJoin); // join user to room   
     // roomsData.forEach(elem => console.log(elem.roomId,elem.occupants,elem.words))
     let gameData =  roomsData.find(elem => elem.roomId === roomToJoin)
-    console.log(gameData)
+    // console.log(gameData)
     io.to(roomToJoin).emit('join_room', // send the board back to the client 
       {...gameData, occupants:[...gameData.occupants] } // serialize occupants as Sets cannot be sent
     ); 
 
   }); 
 
+  //TODO: remove when ready to deploy
   socket.on("send_message", (data) => {
     socket.to(data.room).emit("receive_message", data);
   });
@@ -117,25 +123,28 @@ io.on("connection", (socket) => {
   });
 
 
+  socket.on("leave_room", (user_id) => {
+    
+    // console.log(`${user_id} just left the room from ${findRoomContainingUser(user_id)}`)
+    roomsData = removeUserFromRooms(user_id)
+    roomsData = deleteEmptyRooms()
 
-
+  });
 
 
   socket.on("disconnect", (data) => {
+    roomUserwasIn = findRoomContainingUser(user)
     console.log(`disconnection by ${user}`)
+    // TODO: handle user leaving mid game
+    //message remainding user next user or remove room if both users leave
+    if (roomUserwasIn) io.to(roomUserwasIn.roomId).emit('competitor_left_room');
     
-    roomsData = removeUserFromRoom(user)
+    roomsData = removeUserFromRooms(user)
     roomsData = deleteEmptyRooms()
-
-   
-
-    roomsData.forEach(elem => console.log(elem.occupants)) 
-    // message for next user or remove room if both users leave
-
+ 
   }); 
 }); 
- 
-
+  
 server.listen(3001, () => {
   console.log("SERVER IS RUNNING");
-});
+});  

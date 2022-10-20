@@ -1,7 +1,7 @@
 
 function sketch(p5) {
     let gameBoard;
-    let answerKey;
+    // let answerKey;
     let checkAnswer;
     let removeWordFromList;
     let foundWordData;
@@ -12,7 +12,7 @@ function sketch(p5) {
     p5.updateWithProps = props => { 
         gameBoard = props.board;
         foundWordData = props.foundWordData;
-        answerKey = props.answerKey;
+        // answerKey = props.answerKey;
         checkAnswer = props.checkAnswer;
         removeWordFromList = props.removeWordFromList;
         sendLinesToApp = props.sendLinesToApp;
@@ -20,6 +20,7 @@ function sketch(p5) {
     }
 
     let mainFont = "Montserrat";
+    // let fontToLoad;
     let startX, startY, boardArea;
     let letterCoords = [];
     let lettersMoused = [];
@@ -52,8 +53,13 @@ function sketch(p5) {
         p5.line(elem.coordinates.x1, elem.coordinates.y1, elem.coordinates.x2, elem.coordinates.y2);
       });
     }
+    //TODO: PRELOAD NOT WORKING?
+    p5.preLoad = () =>{
+
+    }
 
     p5.setup = () => {
+      p5.textFont(mainFont)
       checkForUpdatedProps()
       let gridSize = gameBoard.length; 
       boardArea = squareSize * gridSize + 2 // +2 compensates for left and top border
@@ -64,11 +70,13 @@ function sketch(p5) {
     }
 
     p5.draw = () => {
+      
       setGrid(gameBoard)
-      p5.strokeWeight(20)
+      p5.strokeWeight(20) // drawing line thickness
       drawLinesOfFoundWords()
       let multiPlayerState = checkMultiplayerState();
       multiPlayerState ? p5.stroke(tranparentBlue) : p5.stroke(randColor);
+      
     }
     
     //set and temporarily save coordinates of where mouse down occured
@@ -133,11 +141,15 @@ function sketch(p5) {
 
       let boardLen = board.length;
       p5.pop()
+      // p5.textFont('C:/Users/Presto/Documents/local dev/React apps/Competitive-Word-Search/client/src/assets/font/Montez-Regular.ttf')
+      // p5.textFont("font/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw0aXpsog.woff2")
+      // p5.textFont("https://fonts.gstatic.com/s/montserrat/v25/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw5aXo.woff2")
+      // p5.textFont(mainFont)
       // p5.background(244);
       p5.strokeWeight(1)
       p5.stroke("#000000")
       p5.textSize(fontSize)
-      p5.textFont(mainFont)
+      
       p5.textAlign(p5.CENTER)
         for (let row = 0, 
            squareYPos = squareXYStartCoord, 
@@ -190,12 +202,12 @@ function sketch(p5) {
       return foundPosition
     }
     
-    function circ(x,y){
-      p5.push()
-      p5.stroke("red")
-      p5.circle(x,y,5)
-      p5.pop()
-    }
+    // function circ(x,y){
+    //   p5.push()
+    //   p5.stroke("red")
+    //   p5.circle(x,y,5)
+    //   p5.pop()
+    // }
     
     function getRandColor(){
       let colors = ["165,42,42","0,65,255","50,50,50","0,128,0","255,165,0","64,0,255","255,0,0","255,128,0"]
@@ -204,20 +216,8 @@ function sketch(p5) {
       return `rgba(${colors[Math.floor(Math.random()*colors.length)]},0.35)`
 
     }
-    // for 2 player game, listens for gameboard to update so both players
-    // receive the same board and p5 redraws the canvas with the new board info
-    // function checkForNewGameBoard(oldvalue) {
-    //   oldvalue === undefined && (oldvalue = gameBoard);
-    //   let clearcheck = setInterval(repeatcheck,200,oldvalue);
-    //   function repeatcheck(oldvalue) {
-    //       if (gameBoard !== oldvalue) {
-    //           // do something
-    //           clearInterval(clearcheck);
-    //           resetBoardData()
-    //           checkForNewGameBoard()
-    //       }
-    //   }
-    // }
+
+
     function checkForUpdatedProps(oldBoard,oldLines) {
       oldBoard === undefined && (oldBoard = gameBoard);
       oldLines === undefined && (oldLines = foundWordData); //TODO: foundWordData may not need to be monitored here, it can probably be checked from a function in game container
