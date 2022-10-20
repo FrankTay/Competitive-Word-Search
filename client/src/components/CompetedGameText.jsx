@@ -1,10 +1,10 @@
-import React,{useContext} from "react";
-import { GameCompletedContext } from "../contexts/GameCompletedContext";
+import React from "react";
+// import { GameCompletedContext } from "../contexts/GameCompletedContext";
 
 
-function CompetedGameText ({multiPlayerState, resetGame}){
+function CompetedGameText ({multiPlayerState, resetGame, isGameCompleted}){
     
-    const {isGameCompleted} = useContext(GameCompletedContext)
+    // const {isGameCompleted} = useContext(GameCompletedContext)
 
     let output;
     if (!isGameCompleted) output = "";

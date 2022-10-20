@@ -1,16 +1,16 @@
-import React, {useState, useEffect, useContext} from "react";
+import React, {useState, useEffect} from "react";
 import { ReactP5Wrapper } from "react-p5-wrapper";
 import WordList from "./WordList";
 import CompetedGameText from "./CompetedGameText";
 import MultiplayerScore from "./MultiplayerScore";
-import { GameCompletedContext } from "../contexts/GameCompletedContext";
+// import { GameCompletedContext } from "../contexts/GameCompletedContext";
 
 //TODO: for multiplayer, refactor to only update values serverside
 
 function GameContainer(props) {
 //{sketch, boardState, answerKey, linesState, sendUpdatesToServer, boardWordList, wordStatuses, multiPlayerState, multiPlayerId, resetGame}
 
-  const {isGameCompleted, setIsGameCompleted} = useContext(GameCompletedContext)
+  // const {isGameCompleted, setIsGameCompleted} = useContext(GameCompletedContext)
 
   let [boardState, updateBoardState] = useState(props.board);
   let [wordStatuses, setWordStatus] = useState(props.wordListStatus);
@@ -77,7 +77,7 @@ function GameContainer(props) {
     let isGameFinished = checkIfGameComplete()
 
     // set state of above values
-    if(!multiPlayerState) setIsGameCompleted(isGameFinished) 
+    if(!multiPlayerState) props.setIsGameCompleted(isGameFinished) 
   
     setWordStatus(wordStatuses)
   }
@@ -96,13 +96,13 @@ function GameContainer(props) {
   }
 
   const updateGameState = () => {
-    setIsGameCompleted(true);
+    props.setIsGameCompleted(true);
   }
 
   const resetGameContainer = () => {
     //reset single player values
     props.resetGame();
-    setIsGameCompleted(false) 
+    props.setIsGameCompleted(false) 
   }
 
 
@@ -110,10 +110,11 @@ function GameContainer(props) {
     // let isGameFinished = checkIfGameComplete()
 
     // if (isGameFinished)  {
-    //   setIsGameCompleted(isGameFinished)
+    //  props.setIsGameCompleted(isGameFinished)
     // }
-    console.log(`game status from container UF ${isGameCompleted}`)
-  }, [isGameCompleted]);
+    console.log(`game status from container UF ${props.isGameCompleted}`)
+  }//, [props.isGameCompleted]
+  );
 
 
 
@@ -150,9 +151,10 @@ function GameContainer(props) {
       }
 
 
-      {isGameCompleted && <CompetedGameText 
+      {props.isGameCompleted && <CompetedGameText 
       multiPlayerState={multiPlayerState} 
       resetGame={resetGameContainer}
+      isGameCompleted={props.isGameCompleted}
       // isMPgameCompleted={isMPgameCompleted}
       />
       }

@@ -1,11 +1,11 @@
 import React, {useState, useEffect} from 'react'
 import GameContainer from './components/GameContainer'
 import Loading from './components/Loading'
-import Navbar from './components/NavBar';
+// import Navbar from './components/NavBar';
 import io from "socket.io-client";
 import CreateBoard from "./assets/CreateBoard";
 import sketch from "./assets/sketch";
-import { GameCompletedContext } from './contexts/GameCompletedContext';
+// import { GameCompletedContext } from './contexts/GameCompletedContext';
 
 const socket = io.connect("http://localhost:3001");
 let id;
@@ -31,10 +31,12 @@ function App() {
   let [wordStatuses, setWordStatus] = useState(wordListStatus);
   let [linesState, updateLinesState] = useState([]);
   let [multiPlayerState, setMultiPlayer] = useState(false);
+  let [testState, setTestState] = useState(false);
   let [multiPlayerId, setMultiPlayerId] = useState(null);
   let [isMPgamePending, setIsMPgamePending] = useState(false);
-  let [isMPgameCompleted, setMPGameCompleted] = useState(null);//TODO: remove this?
   let [isGameCompleted, setIsGameCompleted] = useState(false);
+
+  // let [isMPgameCompleted, setMPGameCompleted] = useState(null);//TODO: remove this?
 
 
 
@@ -61,15 +63,17 @@ function App() {
     setMultiPlayer(prev => {
       console.log(`start a ${!prev ? "multiplayer": "single" } game`);
       
-      startGame(!prev)
+      
       return !prev;
     })
+    startGame(!multiPlayerState)
   }
 
   const startGame = (multiPlayerState) => {
     
     setIsGameCompleted(false);
-      if(!multiPlayerState){
+    
+    if(!multiPlayerState){
       // console.log("starting new single game")
       // setMultiPlayer(false);
       socket.emit("leave_room", id);
@@ -118,7 +122,7 @@ function App() {
       updateBoardState(roomData.board)
       setWordStatus(roomData.words)
       setAnswerKey(roomData.answers)
-      setMPGameCompleted(false)
+      // setMPGameCompleted(false)
 
       if (roomData.occupants.length === 1){
         console.log("awaiting contender")
@@ -135,7 +139,7 @@ function App() {
       console.log(boardUpdates)
       updateLinesState(boardUpdates.lines)
       setWordStatus(boardUpdates.wordStatus)
-      setMPGameCompleted(boardUpdates.isGameComplete)
+      // setMPGameCompleted(boardUpdates.isGameComplete)
     });
 
     socket.on("competitor_left_room", (data) => {
@@ -145,6 +149,7 @@ function App() {
       console.log("ya boy lefgt")
     });
 
+    console.log(`game status from app UF ${isGameCompleted}`)
     return () => {
       socket.off('connect');
       socket.off('disconnect');
@@ -156,7 +161,9 @@ function App() {
     wordStatuses,
     answerKey,
     isMPgamePending,
-    isMPgameCompleted]);
+    isGameCompleted
+    // isMPgameCompleted,
+  ]);
 
 
   return (
@@ -164,8 +171,9 @@ function App() {
     {/* <Navbar/> */}
       <div className='game-mode'>
       {/* TODO: add button to return to single player and set multiPlayer mode to false */}
-        <button className='button-54' onClick={() =>  toggleGameMode()}  disabled={!multiPlayerState}><h1>Single Player</h1></button> 
-        <button className='button-54' onClick={() => toggleGameMode()}  disabled={multiPlayerState}> <h1>MultiPlayer</h1></button>
+        <button className='button-54' onClick={() =>  startGame(false)}  disabled={!multiPlayerState}><h1>Single Player</h1></button> 
+        <button className='button-54' onClick={() => startGame(true)}  disabled={multiPlayerState}> <h1>MultiPlayer</h1></button>
+        <button className='button-54' onClick={() => setIsGameCompleted(false)} > <h1>CHANGE gamecomp state</h1></button>
       </div>
 
       <div className='new-game-button'>
@@ -174,7 +182,7 @@ function App() {
 
       {(multiPlayerState && isMPgamePending) && <Loading />} 
       <div className={(multiPlayerState && isMPgamePending) ? "hide-container": "show-container"}>
-        <GameCompletedContext.Provider value={{isGameCompleted, setIsGameCompleted}}>
+        {/* <GameCompletedContext.Provider value={{isGameCompleted, setIsGameCompleted}}> */}
           <GameContainer 
             sketch={sketch}
             board={boardState}
@@ -186,8 +194,10 @@ function App() {
             multiPlayerState={multiPlayerState}
             multiPlayerId={multiPlayerId}
             resetGame={resetGame} 
+            isGameCompleted={isGameCompleted}
+            setIsGameCompleted={setIsGameCompleted}  
           />
-        </GameCompletedContext.Provider>
+        {/* </GameCompletedContext.Provider> */}
       </div>
     </div>
   )
