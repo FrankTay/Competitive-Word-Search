@@ -7,8 +7,8 @@ import MultiplayerScore from "./MultiplayerScore";
 
 //TODO: for multiplayer, refactor to only update values serverside
 
-function GameContainer(props) {
-//{sketch, boardState, answerKey, linesState, sendUpdatesToServer, boardWordList, wordStatuses, multiPlayerState, multiPlayerId, resetGame}
+// function GameContainer(props) {
+function GameContainer({sketch, boardState, answerKey, linesState, sendUpdatesToServer, boardWordList, wordStatuses, multiPlayerState, multiPlayerId, resetGame}) {
 
   // const {isGameCompleted, setIsGameCompleted} = useContext(GameCompletedContext)
 
@@ -16,7 +16,7 @@ function GameContainer(props) {
   let [wordStatuses, setWordStatus] = useState(props.wordListStatus);
   let [answerKey, setAnswerKey] = useState(props.answerKey);
   let [foundWordData, updateFoundWordData] = useState(props.lines);
-  let [multiPlayerState, setMultiPlayerState] = useState(props.multiPlayerState);
+  // let [multiPlayerState, setMultiPlayerState] = useState(props.multiPlayerState);
   let [multiPlayerId, setMultiPlayerId] = useState(props.multiPlayerId);
   // let [isMPgameCompleted, setMPGameCompleted] = useState(props.isMPgameCompleted);
 
@@ -26,7 +26,7 @@ function GameContainer(props) {
     updateBoardState(props.board);
     setWordStatus(props.wordListStatus)
     setAnswerKey(props.answerKey)
-    setMultiPlayerState(props.multiPlayerState)
+    props.setMultiPlayerState(props.multiPlayerState)
     updateFoundWordData(props.lines)
     setMultiPlayerId(props.multiPlayerId)
     // setMPGameCompleted(props.isMPgameCompleted)
@@ -154,12 +154,3 @@ function GameContainer(props) {
       {props.isGameCompleted && <CompetedGameText 
       multiPlayerState={multiPlayerState} 
       resetGame={resetGameContainer}
-      isGameCompleted={props.isGameCompleted}
-      // isMPgameCompleted={isMPgameCompleted}
-      />
-      }
-    </>
-  );
-}
-
-export default GameContainer;
