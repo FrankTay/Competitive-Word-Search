@@ -30,7 +30,7 @@ function App() {
   let [answerKey, setAnswerKey] = useState(newBoard.answers);
   let [wordStatuses, setWordStatus] = useState(wordListStatus);
   let [linesState, updateLinesState] = useState([]);
-  let [multiPlayerState, setMultiPlayer] = useState(false);
+  let [multiPlayerState, setMultiPlayerState] = useState(false);
   let [testState, setTestState] = useState(false);
   let [multiPlayerId, setMultiPlayerId] = useState(null);
   let [isMPgamePending, setIsMPgamePending] = useState(false);
@@ -50,46 +50,47 @@ function App() {
 
   const join_room = () => {
     //TODO: Create new board on playing multiplayer
-    setMultiPlayer(true);
+    setMultiPlayerState(true);
     id = socket.id;
     setMultiPlayerId(id)
     let data = {board: boardState, userId: id, words: wordStatuses, answers: answerKey}
     socket.emit("join_room",data)
   }
 
-  const toggleGameMode = () => {
-    setIsGameCompleted(false);
-    console.log(isGameCompleted)
-    setMultiPlayer(prev => {
-      console.log(`start a ${!prev ? "multiplayer": "single" } game`);
+  // const toggleGameMode = () => {
+  //   setIsGameCompleted(false);
+  //   console.log(isGameCompleted)
+  //   setMultiPlayerState(prev => {
+  //     console.log(`start a ${!prev ? "multiplayer": "single" } game`);
       
       
-      return !prev;
-    })
-    startGame(!multiPlayerState)
-  }
+  //     return !prev;
+  //   })
+  //   startGame(!multiPlayerState)
+  // }
 
   const startGame = (multiPlayerState) => {
     
     setIsGameCompleted(false);
     
     if(!multiPlayerState){
-      // console.log("starting new single game")
-      // setMultiPlayer(false);
+      console.log("starting new single game")
+      setMultiPlayerState(false);
+      // setIsMPgamePending(false)
       socket.emit("leave_room", id);
       resetGame();
     } else {
-      // console.log("starting new multi game")
+      console.log("starting new multi game")
 
       //leave any current room
-      // setMultiPlayer(true);
+      // setMultiPlayerState(true);
       socket.emit("leave_room", id);
       join_room();
     }
 
   }
 
-  const resetGame = () => {
+  const resetGame = (gameMode) => {
     //reset single player values
     // setIsGameCompleted(false);
     let newGameValues = new CreateBoard(10, 1);
@@ -192,6 +193,7 @@ function App() {
             boardWordList={boardWordList}
             wordListStatus={wordStatuses} 
             multiPlayerState={multiPlayerState}
+            setMultiPlayerState={setMultiPlayerState}
             multiPlayerId={multiPlayerId}
             resetGame={resetGame} 
             isGameCompleted={isGameCompleted}

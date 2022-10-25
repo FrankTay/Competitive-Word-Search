@@ -16,20 +16,17 @@ function GameContainer(props) {
   let [wordStatuses, setWordStatus] = useState(props.wordListStatus);
   let [answerKey, setAnswerKey] = useState(props.answerKey);
   let [foundWordData, updateFoundWordData] = useState(props.lines);
-  let [multiPlayerState, setMultiPlayerState] = useState(props.multiPlayerState);
+  // let [multiPlayerState, setMultiPlayerState] = useState(props.multiPlayerState);
   let [multiPlayerId, setMultiPlayerId] = useState(props.multiPlayerId);
-  // let [isMPgameCompleted, setMPGameCompleted] = useState(props.isMPgameCompleted);
-
 
 
   useEffect(() => {
     updateBoardState(props.board);
     setWordStatus(props.wordListStatus)
     setAnswerKey(props.answerKey)
-    setMultiPlayerState(props.multiPlayerState)
+    // setMultiPlayerState(props.multiPlayerState)
     updateFoundWordData(props.lines)
     setMultiPlayerId(props.multiPlayerId)
-    // setMPGameCompleted(props.isMPgameCompleted)
 
   }, [props.board,
     props.wordListStatus,
@@ -37,7 +34,6 @@ function GameContainer(props) {
     props.multiPlayerState,
     props.lines,
     props.multiPlayerId,
-    // props.isMPgameCompleted
   ]);
 
 
@@ -77,14 +73,14 @@ function GameContainer(props) {
     let isGameFinished = checkIfGameComplete()
 
     // set state of above values
-    if(!multiPlayerState) props.setIsGameCompleted(isGameFinished) 
+    if(!props.multiPlayerState) props.setIsGameCompleted(isGameFinished) 
   
     setWordStatus(wordStatuses)
   }
 
   const sendLinesToApp = (linesAndWord) => {
     //updates to be processed server side
-    if (multiPlayerState){
+    if (props.multiPlayerState){
       props.sendUpdatesToServer(linesAndWord)
       // console.log(linesAndWord)
     }
@@ -92,30 +88,12 @@ function GameContainer(props) {
   }
   
   const checkMultiplayerState = () => {
-    return multiPlayerState
+    return props.multiPlayerState
   }
 
   const updateGameState = () => {
     props.setIsGameCompleted(true);
   }
-
-  const resetGameContainer = () => {
-    //reset single player values
-    props.resetGame();
-    props.setIsGameCompleted(false) 
-  }
-
-
-  useEffect(() => {
-    // let isGameFinished = checkIfGameComplete()
-
-    // if (isGameFinished)  {
-    //  props.setIsGameCompleted(isGameFinished)
-    // }
-    console.log(`game status from container UF ${props.isGameCompleted}`)
-  }//, [props.isGameCompleted]
-  );
-
 
 
   return (
@@ -137,13 +115,13 @@ function GameContainer(props) {
         <WordList 
           wordListStatus={wordStatuses}
           multiPlayerId={multiPlayerId}
-          multiPlayerState={multiPlayerState} 
+          multiPlayerState={props.multiPlayerState} 
           />
       </div> 
 
       {/* {/TODO: Dress up in future} */}
       {/* {  multiPlayerState &&  <h1 className="muli game-completed">muli game-completed</h1>} */}
-      {multiPlayerState && <MultiplayerScore 
+      {props.multiPlayerState && <MultiplayerScore 
         wordStatuses={wordStatuses}
         multiPlayerId={multiPlayerId}
         updateGameState={updateGameState}
@@ -152,10 +130,9 @@ function GameContainer(props) {
 
 
       {props.isGameCompleted && <CompetedGameText 
-      multiPlayerState={multiPlayerState} 
-      resetGame={resetGameContainer}
+      multiPlayerState={props.multiPlayerState} 
+      // resetGame={resetGameContainer}
       isGameCompleted={props.isGameCompleted}
-      // isMPgameCompleted={isMPgameCompleted}
       />
       }
     </>
