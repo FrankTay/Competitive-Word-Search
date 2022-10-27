@@ -5,6 +5,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const { v4: uuidv4 } = require('uuid');
 
+const createBoard = require("./CreateBoard.js")
 
 app.use(cors());
 
@@ -56,8 +57,8 @@ io.on("connection", (socket) => {
     let roomToJoin;
     //get rooms with 1 person awaiting a competitor
     const availableRoomIndex = roomsData.findIndex(elem => elem.occupants.size === 1 );
-    
-    if (!roomsData.length || availableRoomIndex < 0) {    //if no rooms at all or all rooms are full
+    //if no rooms at all or all rooms are full
+    if (!roomsData.length || availableRoomIndex < 0) {    
       let roomId = uuidv4(); // establish unique room Id
 
       let roomData = {
@@ -73,6 +74,7 @@ io.on("connection", (socket) => {
       roomToJoin = roomId;
       // socket.join(roomToJoin);
     } else {  // room available (1 player awaiting opponent)
+      //place pending player in available room
       roomsData[availableRoomIndex].occupants.add(data.userId); //  add to user to room record
       roomToJoin = roomsData[availableRoomIndex].roomId;
       console.log(`JOINING ROOM: ${roomsData[availableRoomIndex].roomId}`)

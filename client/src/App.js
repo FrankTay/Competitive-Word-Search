@@ -3,7 +3,7 @@ import GameContainer from './components/GameContainer'
 import Loading from './components/Loading'
 // import Navbar from './components/NavBar';
 import io from "socket.io-client";
-import CreateBoard from "./assets/CreateBoard";
+import { BoardData } from "./assets/GenerateBoardInfo";
 import sketch from "./assets/sketch";
 // import { GameCompletedContext } from './contexts/GameCompletedContext';
 
@@ -15,36 +15,22 @@ let id;
 //TODO: handle error of no boards being returned
 
 function App() {
-  let boardInfo = new CreateBoard(10, 1); //default 20 x 20 board, with 30 words
-  let newBoard = boardInfo.generateBoard();
-  let boardWordList = newBoard.answers.map(elem => elem.word);
-  let wordListStatus = boardWordList.map(elem => {
-    return {
-      word: elem,
-      found: false,
-      foundBy:null
-    };
-  })
+  let boardDimensions = 10;
+  let totalWords = 1;
+
+  let {newBoard,wordListStatus} = BoardData(boardDimensions,totalWords);
 
   let [boardState, updateBoardState] = useState(newBoard.board);
   let [answerKey, setAnswerKey] = useState(newBoard.answers);
   let [wordStatuses, setWordStatus] = useState(wordListStatus);
   let [linesState, updateLinesState] = useState([]);
   let [multiPlayerState, setMultiPlayerState] = useState(false);
-  let [testState, setTestState] = useState(false);
   let [multiPlayerId, setMultiPlayerId] = useState(null);
   let [isMPgamePending, setIsMPgamePending] = useState(false);
   let [isGameCompleted, setIsGameCompleted] = useState(false);
 
-  // let [isMPgameCompleted, setMPGameCompleted] = useState(null);//TODO: remove this?
 
-
-
-  // console.log(`is game complete(FROM APP)? ${isGameCompleted}`)
-
-  //TODO: make arrow func
-  function sendUpdatesToServer(linesAndWord){
-    // TODO: only send if in multplayer mode, MAKE SURE 2 USERS ARE IN ROOM AS WELL(handle 2nd part server)
+  const sendUpdatesToServer = (linesAndWord) => {
     if (multiPlayerState) socket.emit("found_word_data",linesAndWord);
   }
 
@@ -53,6 +39,7 @@ function App() {
     setMultiPlayerState(true);
     id = socket.id;
     setMultiPlayerId(id)
+
     let data = {board: boardState, userId: id, words: wordStatuses, answers: answerKey}
     socket.emit("join_room",data)
   }
@@ -69,19 +56,20 @@ function App() {
   //   startGame(!multiPlayerState)
   // }
 
-  const startGame = (multiPlayerState) => {
-    
+  const startGame = (gameMode = "single") => {
+    let currentMultiState = (gameMode === "multi") ? true : false;
+
     setIsGameCompleted(false);
-    
-    if(!multiPlayerState){
+    resetGame();
+    if(!currentMultiState){
       console.log("starting new single game")
+      // console.log(` words are ${wordStatuses[0].word}`)
       setMultiPlayerState(false);
       // setIsMPgamePending(false)
       socket.emit("leave_room", id);
-      resetGame();
+      // resetGame();
     } else {
       console.log("starting new multi game")
-
       //leave any current room
       // setMultiPlayerState(true);
       socket.emit("leave_room", id);
@@ -93,16 +81,9 @@ function App() {
   const resetGame = (gameMode) => {
     //reset single player values
     // setIsGameCompleted(false);
-    let newGameValues = new CreateBoard(10, 1);
-    let newBoard = newGameValues.generateBoard();
-    let boardWordList = newBoard.answers.map(elem => elem.word);
-    let wordListStatus = boardWordList.map(elem => {
-      return {
-        word: elem,
-        found: false,
-        foundBy:null
-      };
-    })
+    console.log("reseting game")
+    let {newBoard, boardWordList, wordListStatus} = BoardData(boardDimensions,totalWords);
+
     updateBoardState(newBoard.board);
     setWordStatus(wordListStatus)
     setAnswerKey(newBoard.answers)
@@ -110,11 +91,11 @@ function App() {
     updateLinesState([])
     // setGameCompleted(false)
     // setMultiPlayerId(props.multiPlayerId)
+    console.log(` words are ${wordStatuses[0].word}`)
 
   }
 
   useEffect(() => {
-    console.log(isGameCompleted)
     
     socket.on("join_room", (roomData) => {
       //TODO clear any lines from previous game
@@ -150,7 +131,6 @@ function App() {
       console.log("ya boy lefgt")
     });
 
-    console.log(`game status from app UF ${isGameCompleted}`)
     return () => {
       socket.off('connect');
       socket.off('disconnect');
@@ -172,25 +152,24 @@ function App() {
     {/* <Navbar/> */}
       <div className='game-mode'>
       {/* TODO: add button to return to single player and set multiPlayer mode to false */}
-        <button className='button-54' onClick={() =>  startGame(false)}  disabled={!multiPlayerState}><h1>Single Player</h1></button> 
-        <button className='button-54' onClick={() => startGame(true)}  disabled={multiPlayerState}> <h1>MultiPlayer</h1></button>
-        <button className='button-54' onClick={() => setIsGameCompleted(false)} > <h1>CHANGE gamecomp state</h1></button>
+        <button className='button-54' onClick={() =>  startGame()}  disabled={!multiPlayerState}><h1>Single Player</h1></button> 
+        <button className='button-54' onClick={() => startGame("multi")}  disabled={multiPlayerState}> <h1>MultiPlayer</h1></button>
+        {/* <button className='button-54' onClick={() => setIsGameCompleted(false)} > <h1>CHANGE gamecomp state</h1></button> */}
       </div>
 
       <div className='new-game-button'>
-        <button className='button-54' onClick={() => startGame(multiPlayerState)}><h4>New Game</h4></button>
+        <button className='button-54' onClick={() => startGame()}><h4>New Game</h4></button>
       </div>
 
       {(multiPlayerState && isMPgamePending) && <Loading />} 
       <div className={(multiPlayerState && isMPgamePending) ? "hide-container": "show-container"}>
-        {/* <GameCompletedContext.Provider value={{isGameCompleted, setIsGameCompleted}}> */}
           <GameContainer 
             sketch={sketch}
             board={boardState}
             answerKey={answerKey}
             lines={linesState}
             sendUpdatesToServer={sendUpdatesToServer}
-            boardWordList={boardWordList}
+            // boardWordList={boardWordList}
             wordListStatus={wordStatuses} 
             multiPlayerState={multiPlayerState}
             setMultiPlayerState={setMultiPlayerState}
@@ -199,7 +178,6 @@ function App() {
             isGameCompleted={isGameCompleted}
             setIsGameCompleted={setIsGameCompleted}  
           />
-        {/* </GameCompletedContext.Provider> */}
       </div>
     </div>
   )

@@ -71,9 +71,9 @@ function GameContainer(props) {
 
     //TODO: ONLY CHECK LOCALLY IF SINGLE PLAYER GAME
     let isGameFinished = checkIfGameComplete()
-
     // set state of above values
-    if(!props.multiPlayerState) props.setIsGameCompleted(isGameFinished) 
+    // if(!props.multiPlayerState) 
+    props.setIsGameCompleted(isGameFinished) 
   
     setWordStatus(wordStatuses)
   }
