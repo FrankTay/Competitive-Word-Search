@@ -10,13 +10,11 @@ import MultiplayerScore from "./MultiplayerScore";
 function GameContainer(props) {
 //{sketch, boardState, answerKey, linesState, sendUpdatesToServer, boardWordList, wordStatuses, multiPlayerState, multiPlayerId, resetGame}
 
-  // const {isGameCompleted, setIsGameCompleted} = useContext(GameCompletedContext)
 
   let [boardState, updateBoardState] = useState(props.board);
   let [wordStatuses, setWordStatus] = useState(props.wordListStatus);
   let [answerKey, setAnswerKey] = useState(props.answerKey);
   let [foundWordData, updateFoundWordData] = useState(props.lines);
-  // let [multiPlayerState, setMultiPlayerState] = useState(props.multiPlayerState);
   let [multiPlayerId, setMultiPlayerId] = useState(props.multiPlayerId);
 
 
@@ -24,7 +22,6 @@ function GameContainer(props) {
     updateBoardState(props.board);
     setWordStatus(props.wordListStatus)
     setAnswerKey(props.answerKey)
-    // setMultiPlayerState(props.multiPlayerState)
     updateFoundWordData(props.lines)
     setMultiPlayerId(props.multiPlayerId)
 

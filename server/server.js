@@ -5,7 +5,8 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const { v4: uuidv4 } = require('uuid');
 
-const createBoard = require("./CreateBoard.js")
+const newBoardData = require("./CreateBoard.js");
+const { Console } = require("console");
 
 app.use(cors());
 
@@ -18,10 +19,6 @@ const io = new Server(server, {
   },
 });
 
-// app.get("/", (req,res) => {
-//   res.send("<h1>home</h>")
-// }) 
-// let rooms = {}
 let roomsData = [] // elements are an objects with > roomId: str, occupants: set, data: array
 function findRoomContainingUser(userId) {
   return roomsData.find(elem => elem.occupants.has(userId))
@@ -50,26 +47,35 @@ io.on("connection", (socket) => {
 
 
   socket.on("join_room", (data) => {
-     //do nothing if user is already in a room
+     //reject if user is already in a room
     let userAlreadyInRoom = roomsData.find(elem => elem.occupants.has(data.userId))
     if (userAlreadyInRoom) return
-
+    
     let roomToJoin;
-    //get rooms with 1 person awaiting a competitor
-    const availableRoomIndex = roomsData.findIndex(elem => elem.occupants.size === 1 );
+
+    //get index of 1st room with 1 person awaiting a competitor
+    const availableRoomIndex = roomsData.findIndex(elem => {
+      return elem.occupants.size === 1 && 
+      (!elem.gameComplete) &&// and game is not already completed
+      elem.words.every( word => word.found === false)// no words have been found yet
+    });
+    
     //if no rooms at all or all rooms are full
     if (!roomsData.length || availableRoomIndex < 0) {    
       let roomId = uuidv4(); // establish unique room Id
 
+      let {newBoard,wordListStatus} = newBoardData(data.boardDimensions,data.totalWords);
+
       let roomData = {
                       roomId:roomId,
                       occupants:new Set([data.userId]),
-                      board: data.board,
-                      words: data.words,
-                      answers: data.answers,
+                      board: newBoard.board,
+                      words: wordListStatus,
+                      answers: newBoard.answers,
                       lines: null,
                       gameComplete: false
                     };
+
       roomsData.push(roomData); // add room to rooms record and add user to room
       roomToJoin = roomId;
       // socket.join(roomToJoin);
@@ -83,6 +89,7 @@ io.on("connection", (socket) => {
     socket.join(roomToJoin); // join user to room   
     // roomsData.forEach(elem => console.log(elem.roomId,elem.occupants,elem.words))
     let gameData =  roomsData.find(elem => elem.roomId === roomToJoin)
+
     // console.log(gameData)
     io.to(roomToJoin).emit('join_room', // send the board back to the client 
       {...gameData, occupants:[...gameData.occupants] } // serialize occupants as Sets cannot be sent

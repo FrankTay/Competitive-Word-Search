@@ -27,8 +27,6 @@ function MultiplayerScore({wordStatuses,multiPlayerId,updateGameState}){
 
     useEffect(() => {
       if (gameOutcome) updateGameState();
-
-
     })
 
     return (
