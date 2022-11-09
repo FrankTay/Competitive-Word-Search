@@ -4,16 +4,8 @@ function MultiplayerScore({wordStatuses,multiPlayerId,updateGameState}){
     const myId = multiPlayerId;
     const total = wordStatuses.length;
 
-    const wordsFoundByMe = wordStatuses.filter((elem) => {
-      if (myId && (elem.foundBy === myId)) 
-      return elem
-    }) 
-
-    const wordsFoundByOpp = wordStatuses.filter((elem) => {
-      if (elem.foundBy && (elem.foundBy !== myId)) {
-        return elem
-      }
-    }) 
+    const wordsFoundByMe = wordStatuses.filter((elem) => (myId && (elem.foundBy === myId))) 
+    const wordsFoundByOpp = wordStatuses.filter((elem) => (elem.foundBy && (elem.foundBy !== myId))) 
 
     const myPercentageFound = Math.round((wordsFoundByMe.length / total) * 100);
     const opponentPercentageFound = Math.round((wordsFoundByOpp.length / total) * 100);

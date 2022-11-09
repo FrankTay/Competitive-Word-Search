@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import GameContainer from './components/GameContainer'
 import Loading from './components/Loading'
 import io from "socket.io-client";
@@ -12,10 +12,12 @@ let id;
 //TODO: limit board size to no smaller than 10x10 and no greater than 25x25 and increments of 5
 
 function App() {
-  let boardDimensions = 10;
-  let totalWords = 3;
+  let boardDimensions = 12;
+  let totalWords = 5;
+  let wordTotalInput = useRef();
 
   let {newBoard,wordListStatus} = BoardData(boardDimensions,totalWords);
+  // let [totalWords, updateTotalWords] = useState(5);
 
   let [boardState, updateBoardState] = useState(newBoard.board);
   let [answerKey, setAnswerKey] = useState(newBoard.answers);
@@ -60,7 +62,7 @@ function App() {
   const resetGame = (gameMode) => {
     console.log("reseting game")
     socket.emit("leave_room", id);
-    let {newBoard, wordListStatus} = BoardData(boardDimensions,totalWords);
+    let {newBoard, wordListStatus} = BoardData(boardDimensions,Number(wordTotalInput.current.value));
 
     updateBoardState(newBoard.board);
     setWordStatus(wordListStatus)
@@ -133,11 +135,13 @@ function App() {
           </button> */}
           <div>
             <label htmlFor="cars">Total words:</label>
-             <select id="word-count" >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-              <option value="20">20</option>
+             <select value={totalWords} ref={wordTotalInput} onChange={()=> startGame()} id="word-count" >
+              <option>1</option>
+              <option>3</option>
+              <option>5</option>
+              <option>10</option>
+              <option>15</option>
+              <option>20</option>
             </select>
           </div>
         </div>

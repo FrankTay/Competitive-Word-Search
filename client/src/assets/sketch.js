@@ -1,7 +1,6 @@
 
 function sketch(p5) {
     let gameBoard;
-    // let answerKey;
     let checkAnswer;
     let removeWordFromList;
     let foundWordData;
@@ -12,7 +11,6 @@ function sketch(p5) {
     p5.updateWithProps = props => { 
         gameBoard = props.board;
         foundWordData = props.foundWordData;
-        // answerKey = props.answerKey;
         checkAnswer = props.checkAnswer;
         removeWordFromList = props.removeWordFromList;
         sendLinesToApp = props.sendLinesToApp;
@@ -53,6 +51,7 @@ function sketch(p5) {
         p5.line(elem.coordinates.x1, elem.coordinates.y1, elem.coordinates.x2, elem.coordinates.y2);
       });
     }
+    
     //TODO: PRELOAD NOT WORKING?
     p5.preLoad = () =>{
 

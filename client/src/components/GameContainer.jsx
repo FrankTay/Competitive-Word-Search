@@ -3,13 +3,8 @@ import { ReactP5Wrapper } from "react-p5-wrapper";
 import WordList from "./WordList";
 import CompetedGameText from "./CompetedGameText";
 import MultiplayerScore from "./MultiplayerScore";
-// import { GameCompletedContext } from "../contexts/GameCompletedContext";
 
-//TODO: for multiplayer, refactor to only update values serverside
-
-// function GameContainer(props) {
-function GameContainer({sketch, boardState, answerKey, linesState, sendUpdatesToServer, boardWordList, wordStatuses, multiPlayerState, multiPlayerId, resetGame}) {
-
+function GameContainer(props) {
 
   let [boardState, updateBoardState] = useState(props.board);
   let [wordStatuses, setWordStatus] = useState(props.wordListStatus);
@@ -17,7 +12,7 @@ function GameContainer({sketch, boardState, answerKey, linesState, sendUpdatesTo
   let [foundWordData, updateFoundWordData] = useState(props.lines);
   let [multiPlayerId, setMultiPlayerId] = useState(props.multiPlayerId);
 
-
+  // update all values on rerender
   useEffect(() => {
     updateBoardState(props.board);
     setWordStatus(props.wordListStatus)
@@ -65,11 +60,9 @@ function GameContainer({sketch, boardState, answerKey, linesState, sendUpdatesTo
       if (elem.word === word) elem.found = true
       return elem
     })
-
-    //TODO: ONLY CHECK LOCALLY IF SINGLE PLAYER GAME
+    // each time a word is found, recheck to see if the game is completed
     let isGameFinished = checkIfGameComplete()
-    // set state of above values
-    // if(!props.multiPlayerState) 
+
     props.setIsGameCompleted(isGameFinished) 
   
     setWordStatus(wordStatuses)
@@ -79,7 +72,6 @@ function GameContainer({sketch, boardState, answerKey, linesState, sendUpdatesTo
     //updates to be processed server side
     if (props.multiPlayerState){
       props.sendUpdatesToServer(linesAndWord)
-      // console.log(linesAndWord)
     }
 
   }
@@ -100,8 +92,6 @@ function GameContainer({sketch, boardState, answerKey, linesState, sendUpdatesTo
         <ReactP5Wrapper  
           board={boardState}
           sketch={props.sketch}
-          //TODO: remove this before deployment
-          answerKey={answerKey}
           checkAnswer={checkAnswer}
           removeWordFromList={removeWordFromList}
           foundWordData={foundWordData} 
@@ -116,8 +106,6 @@ function GameContainer({sketch, boardState, answerKey, linesState, sendUpdatesTo
           />
       </div> 
 
-      {/* {/TODO: Dress up in future} */}
-      {/* {  multiPlayerState &&  <h1 className="muli game-completed">muli game-completed</h1>} */}
       {props.multiPlayerState && <MultiplayerScore 
         wordStatuses={wordStatuses}
         multiPlayerId={multiPlayerId}
@@ -125,10 +113,8 @@ function GameContainer({sketch, boardState, answerKey, linesState, sendUpdatesTo
       />
       }
 
-
       {props.isGameCompleted && <CompetedGameText 
       multiPlayerState={props.multiPlayerState} 
-      // resetGame={resetGameContainer}
       isGameCompleted={props.isGameCompleted}
       />
       }
