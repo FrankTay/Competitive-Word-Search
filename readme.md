@@ -2,7 +2,7 @@
 
 ## Preview
 
-![App menu](Demo.jpg)
+![App menu](/Demo.JPG)
 
 ## Description
 
