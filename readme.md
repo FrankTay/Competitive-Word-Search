@@ -1,4 +1,4 @@
-# Company Quote Generator
+# Word Search Battle
 
 ## Preview
 
